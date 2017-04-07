@@ -80,7 +80,7 @@ func s:do_highlight()
     return
   endif
 
-  let l:syn = synIDattr(synIDtrans(synID(line("."), col("."), 1)), "name")
+  let l:syn = vimwits#syntax_group()
 
   if g:vimwits_valid_hi_groups != [] && index(g:vimwits_valid_hi_groups, l:syn) == -1
     " We are filtering valid higlight groups and the cursor isn't in the correct one
@@ -165,6 +165,10 @@ func vimwits#disable()
     au!
   augroup END
   call s:clear()
+endfunc
+
+func vimwits#syntax_group()
+  return synIDattr(synIDtrans(synID(line("."), col("."), 1)), "name")
 endfunc
 
 " vim:ft=vim:fdm=marker
