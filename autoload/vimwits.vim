@@ -20,7 +20,11 @@ func s:au_setup(buf_local)
       exe "autocmd CursorMovedI " . l:pats . " call s:do_highlight()"
     endif
     if exists('##WinEnter')
-      exe "autocmd TextChanged " . l:pats . " call s:force_do_highlight()"
+      exe "autocmd WinEnter " . l:pats . " call s:force_do_highlight()"
+      exe "autocmd WinLeave " . l:pats . " call s:clear()"
+    endif
+    if exists('##FocusLost')
+      exe "autocmd FocusLost " . l:pats . " call s:clear()"
     endif
     if exists('##TextChanged')
       exe "autocmd TextChanged " . l:pats . " call s:do_highlight()"
@@ -47,11 +51,11 @@ endfunc
 func s:check_enable()
   if g:vimwits_enable == 0
     return 0
-  elseif exists("t:vimwits_enable") && t:vimwits_enable == 0
+  elseif gettabvar('%', "vimwits_enable", 1) == 0
     return 0
-  elseif exists("w:vimwits_enable") && w:vimwits_enable == 0
+  elseif getwinvar('%', "vimwits_enable", 1) == 0
     return 0
-  elseif exists("b:vimwits_enable") && b:vimwits_enable == 0
+  elseif getbufvar('%', "vimwits_enable", 1) == 0
     return 0
   endif
   return 1
@@ -88,7 +92,7 @@ func s:do_highlight()
     return
   endif
 
-  if exists("w:vimwits_oldMatchWord") && w:vimwits_oldMatchWord == l:cword
+  if getwinvar('%', "vimwits_oldMatchWord", "") == l:cword
     " Already matching this word. Don't bother searching again.
     return
   endif
@@ -115,14 +119,22 @@ endfunc
 " SECTION: Interface functions {{{
 func vimwits#init()
   let g:vimwits_enable = 1
-  bufdo if exists("b:__vimwits_has_au") | unlet b:__vimwits_has_au | endif
+  for l:b in range(bufnr("$"))
+    call setbufvar(l:b, "__vimwits_has_au", 0)
+  endfor
   call vimwits#reset()
 endfunc
 
 func vimwits#reset()
-  tabdo if exists("t:vimwits_enable") | unlet t:vimwits_enable | endif
-  tabdo if exists("w:vimwits_enable") | unlet w:vimwits_enable | endif
-  tabdo if exists("b:vimwits_enable") | unlet b:vimwits_enable | endif
+  for l:b in range(bufnr("$"))
+    call setbufvar(l:b, "vimwits_enable", 1)
+  endfor
+  for l:w in range(winnr("$"))
+    call setwinvar(l:w, "vimwits_enable", 1)
+  endfor
+  for l:t in range(tabpagenr("$"))
+    call settabvar(l:t, "vimwits_enable", 1)
+  endfor
   if g:vimwits_enable
     call s:au_setup(0)
     call s:do_highlight()
@@ -135,9 +147,9 @@ func vimwits#enable_buf()
   call vimwits#init()
 
   " Use the User autocmd to test if this buffer already has autocommands
-  doautocmd vimwits User
+  silent doautocmd vimwits User
 
-  if !exists("b:__vimwits_has_au")
+  if getbufvar('%', "__vimwits_has_au", 0) == 0
     call s:au_setup(1)
     let b:__vimwits_has_au = 1
   endif
@@ -152,7 +164,9 @@ func vimwits#disable_buf()
 endfunc
 
 func vimwits#disable_bufs()
-  bufdo if exists("b:__vimwits_has_au") | unlet b:__vimwits_has_au | endif
+  for l:b in range(bufnr("$"))
+    call setbufvar(l:b, "__vimwits_has_au", 0)
+  endfor
   augroup vimwits_buf
     au!
   augroup END
