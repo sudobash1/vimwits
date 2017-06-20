@@ -103,7 +103,7 @@ func s:do_highlight()
 
   let l:topline = line("w0") - 1
   let l:botline = line("w$") + 1
-  let l:match_re = '\V\%>' . l:topline . 'l\%<' . l:botline . 'l\<' . l:cword . '\>'
+  let l:match_re = '\V\%>'.l:topline.'l\%<'.l:botline.'l\<'.l:cword.'\>'
 
   let w:vimwits_match = matchadd("VimWitsMatch", l:match_re)
 

@@ -23,7 +23,8 @@ if !exists("g:vimwits_enable")
   let g:vimwits_enable = 1
 endif
 if !exists("g:vimwits_ft_patterns")
-  let g:vimwits_ft_patterns = "*.c,*.cpp,*.cxx,*.hxx,*.h,*.hpp,*.py,*.pl,*.cs,*.java"
+  let g:vimwits_ft_patterns = "*.c,*.cpp,*.cxx,*.hxx,*.h,*.hpp,*.C,*.H,
+                              \*.py,*.pl,*.cs,*.java,*.php,*.js,*.rb,*.go,*.mm"
 endif
 if !exists("g:vimwits_in_insert")
   let g:vimwits_in_insert = 0
