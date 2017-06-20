@@ -74,8 +74,18 @@ func s:do_highlight()
 
   let l:syn = vimwits#syntax_group()
 
-  if g:vimwits_valid_hi_groups != [] && index(g:vimwits_valid_hi_groups, l:syn) == -1
-    " We are filtering valid higlight groups and the cursor isn't in the correct one
+  if exists('b:vimwits_valid_hi_groups')
+    if b:vimwits_valid_hi_groups != [] &&
+          \ index(b:vimwits_valid_hi_groups, l:syn) == -1
+      " We are filtering valid higlight groups in this buffer and the cursor
+      " isn't in the correct one
+      call s:clear()
+      return
+    endif
+  elseif g:vimwits_valid_hi_groups != [] &&
+        \ index(g:vimwits_valid_hi_groups, l:syn) == -1
+    " We are filtering valid higlight groups and the cursor isn't in the
+    " correct one
     call s:clear()
     return
   endif
@@ -126,9 +136,13 @@ func vimwits#reset()
 endfunc
 
 func vimwits#enable_buf()
-  call vimwits#init()
+  " Make sure vimwits is enabled
+  let g:vimwits_enable = 1
+  call s:au_setup(0)
+  call s:do_highlight()
 
   " Use the User autocmd to test if this buffer already has autocommands
+  let b:__vimwits_has_au = 0
   silent doautocmd vimwits User
 
   if getbufvar('%', "__vimwits_has_au", 0) == 0
