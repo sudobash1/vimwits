@@ -1,13 +1,22 @@
 " Author: Stephen Robinson <sblazerobinson@gmail.com>
 " Version: 0.1
 
-if exists("g:loaded_vimwits") || &cp || !exists("##CursorMoved") || v:version < 700
+if exists("g:loaded_vimwits") || &cp
   finish
 endif
 
 let g:loaded_vimwits    = 0.1
+
+if !exists("##CursorMoved") || v:version < 700
+  echoerr "Unable to use VimWits."
+  echoerr ""
+  echoerr "Vimwits requres vim >= 7.0 with CursorMoved compiled in."
+endif
+
 let s:keepcpo           = &cpo
 set cpo&vim
+
+" ------------------------------------------------------------------------------
 
 " Global Variables {{{
 if !exists("g:vimwits_enable")
