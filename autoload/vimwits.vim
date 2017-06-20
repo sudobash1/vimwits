@@ -48,19 +48,6 @@ func s:au_setup(buf_local)
   augroup END
 endfunc
 
-func s:check_enable()
-  if g:vimwits_enable == 0
-    return 0
-  elseif gettabvar('%', "vimwits_enable", 1) == 0
-    return 0
-  elseif getwinvar('%', "vimwits_enable", 1) == 0
-    return 0
-  elseif getbufvar('%', "vimwits_enable", 1) == 0
-    return 0
-  endif
-  return 1
-endfunc
-
 func s:clear()
   if exists("w:vimwits_match")
     call matchdelete(w:vimwits_match)
@@ -73,7 +60,8 @@ func s:do_highlight()
   let l:cword = escape(expand('<cword>'), '/\' )
 
   " Test if enabled and on a valid word
-  if l:cword == "" || s:check_enable() == 0 || l:cword=~g:vimwits_ignore
+  if l:cword == "" || l:cword=~g:vimwits_ignore ||
+        \ g:vimwits_enable == 0 || getbufvar('%', "vimwits_enable", 1) == 0
     call s:clear()
     return
   endif
@@ -128,12 +116,6 @@ endfunc
 func vimwits#reset()
   for l:b in range(bufnr("$"))
     call setbufvar(l:b, "vimwits_enable", 1)
-  endfor
-  for l:w in range(winnr("$"))
-    call setwinvar(l:w, "vimwits_enable", 1)
-  endfor
-  for l:t in range(tabpagenr("$"))
-    call settabvar(l:t, "vimwits_enable", 1)
   endfor
   if g:vimwits_enable
     call s:au_setup(0)
