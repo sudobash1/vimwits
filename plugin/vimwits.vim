@@ -1,5 +1,5 @@
 " Author: Stephen Robinson <sblazerobinson@gmail.com>
-" Version: 0.1
+" Version: 0.2
 "
 " This file is part of VimWits. Copyright Stephen Robinson, 2017
 "
@@ -20,7 +20,7 @@ if exists("g:loaded_vimwits") || &cp
   finish
 endif
 
-let g:loaded_vimwits    = 0.1
+let g:loaded_vimwits    = 0.2
 
 if !exists("##CursorMoved") || v:version < 700
   echoerr "Unable to use VimWits."
