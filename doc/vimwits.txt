@@ -1,0 +1,225 @@
+*vimwits.txt* "Where Is This Symbol" underlining
+	     _      _             _      __      _               ~
+	    | |    / ) _         | |    /  |    / ) _    __      ~
+	    | |   / / (_)        | |   /   |   / / (_)__/ /      ~
+	    | |  / / _   ______  | |  / /| |  / / _  (_  __)____ ~
+	    | | / / / ) /      | | | / / | | / / / )  / /  / ___)~
+	    | |/ / / / / /| /| | | |/ /  | |/ / / /  / /   \__ \ ~
+	    (___/ (_/ (_/ (/ |_) (___/   (___/ (_/  (__)  (____/ ~
+
+			     Where Is This Symbol
+	       Underline all occurrences of the current symbol
+
+
+
+==============================================================================
+CONTENTS                                                     *VimWitsContents*
+
+    1. Usage ................ |VimWitsUsage|
+    2. Commands ............. |VimWitsCommands|
+    3. Options .............. |VimWitsOptions|
+    4. License .............. |VimWitsLicense|
+    5. Bugs ................. |VimWitsBugs|
+    6. Contributing ......... |VimWitsContributing|
+
+
+==============================================================================
+USAGE                                                           *VimWitsUsage*
+
+VimWits, stands for Vim Where Is This Symbol. It helps get your wits about the
+code.
+
+This plugin is used to automatically underline all visible occurrences of the
+symbol currently under the cursor. It works in real time and should not slow 
+down navigating or editing. It is similar to the |matchparen| plugin in usage
+and implementation.
+
+To use, simply install and edit your code files. When your cursor is above a
+non-highlighted symbol, it will get underlined, along with all other
+occurrences of the symbol on screen.
+
+
+==============================================================================
+COMMANDS                                                     *VimWitsCommands*
+
+------------------------------------------------------------------------------
+:VimWitsEnable                                                *:VimWitsEnable*
+
+Enable VimWits. This initializes (or reinitializes) VimWits and enables it
+according to how it is set up below.
+
+------------------------------------------------------------------------------
+:VimWitsDisable                                              *:VimWitsDisable*
+
+Disable VimWits. This will temporarially disable VimWits. Re-enable it by
+using |:VimWitsEnable|.
+
+------------------------------------------------------------------------------
+:VimWitsEnableBuf                                          *:VimWitsEnableBuf*
+
+Enable VimWits for the current buffer. This forces VimWits to be initialized
+and enabled. This may be used to enable VimWits in a buffer where it would
+ordinarily not be (e.g. a text file).
+
+------------------------------------------------------------------------------
+:VimWitsDisableBuf                                        *:VimWitsDisableBuf*
+
+Disable VimWits within the current buffer. This causes VimWits to stop
+underlining within the current buffer, but it has no effect on other buffers.
+This may be used to undo |:VimWitsEnableBuf| or with an autocommand to disable
+VimWits in certain situations. (For an example see |g:vimwits_ft_patterns|)
+
+------------------------------------------------------------------------------
+:VimWitsDisableBufs                                      *:VimWitsDisableBufs*
+
+Disable VimWits in all buffers where it was specifically enabled by
+|:VimWitsEnableBuf|.
+
+
+==============================================================================
+OPTIONS                                                       *VimWitsOptions*
+
+You can configure VimWits with the following options. It is recommended to set
+this in your |vimrc|, but you can also set them manually later. You may be
+required to run |:VimWitsEnable| again for the setting to take effect.
+
+------------------------------------------------------------------------------
+g:vimwits_enable                                            *g:vimwits_enable*
+
+Set this to 0 in your |vimrc| to disable VimWits. It will not be initialized
+or used. You may still later run |:VimWitsEnable| to initialize and enable
+VimWits.
+
+If VimWits has already been initialized, and you later set this to 0, then it
+will be immediately disabled. Set it back to 1 or run |:VimWitsEnable| to
+re-enable.
+
+Default: 1 (VimWits enabled)
+
+------------------------------------------------------------------------------
+g:vimwits_ft_patterns                                  *g:vimwits_ft_patterns*
+
+These are filepatterns which VimWits is enabled for. VimWits will not
+underline anything in other files. By default, this is set to match many
+popular program languages, including:
+
+    * C, C++, C#, Visual C ~
+    * Python, Perl, Ruby ~
+    * PHP, Javascript ~
+
+The variable is set to an autocmd pattern (see |autocmd-patterns|). E.g. to
+only enable for .c and .h files >
+
+  let g:vimwits_ft_patterns = '*.c,*.h'
+<
+If you want to enable for all files >
+
+  let g:vimwits_ft_patterns = '*'
+
+Note: enabling for all files will also include .txt files and other
+non-programming files. If you want to enable VimWits for all filetypes except
+for a few, it is recommended to use |autocommand|s like this: >
+
+  let g:vimwits_ft_patterns = '*'
+  autocmd BufNewFile,BufRead *.txt,*.bash :VimWitsDisableBuf
+
+This will enable VimWits for all files except *.txt and *.bash files.
+
+Default: '*.c,*.cpp,*.cxx,*.hxx,*.h,*.hpp,*.C,*.H*.py,*.pl,*.cs,*.java,*.php,
+          *.js,*.rb,*.go,*.mm'
+
+------------------------------------------------------------------------------
+g:vimwits_in_insert                                      *g:vimwits_in_insert*
+
+If this is set to 1, then VimWits will still underline the current symbol,
+even if you are in insert mode.
+
+Default: 0 (VimWits disabled in insert mode)
+
+------------------------------------------------------------------------------
+g:vimwits_valid_hi_groups                          *g:vimwits_valid_hi_groups*
+b:vimwits_valid_hi_groups                          *b:vimwits_valid_hi_groups*
+
+This sets the highlighting groups which it is valid to underline in. It must
+be a list of |group-name|s. For example, to underline only things highlighted
+as functions or identifiers, set it to: >
+
+  let g:vimwits_valid_hi_groups = ["Identifier", "Function"]
+<
+The empty string mean no highlight group. So to set it to underline only
+things without a highlight group set it to: >
+
+  let g:vimwits_valid_hi_groups = [""]
+<
+To enable highlighting globally, set it to an empty list: >
+
+  let g:vimwits_valid_hi_groups = []
+<
+Note: With many languages (such as c), the identifiers and functions are not
+highlighted. Only some like vimscript have any highlighting for identifiers
+and functions.
+
+The b:vimwits_valid_hi_groups option is identical. When it is set (by default
+it is unset) it takes presidence over g:vimwits_valid_hi_groups. This is
+useful for in |autocommand|s like this: >
+
+  autocmd BufNewFile,BufRead *.html :let b:vimwits_valid_hi_groups = []
+
+This will use VimWits underlining for all highlight groups in html files.
+
+Default: ["Identifier", "Function", ""]
+
+------------------------------------------------------------------------------
+g:vimwits_ignore                                            *g:vimwits_ignore*
+
+This option sets a regex for symbols which VimWits ignores. For example, to
+not underline any symbols which start with _ do: >
+
+  let g:vimwits_ignore = "^_"
+<
+Default: "^[0-9]" (Ignore all words that start with a digit)
+
+------------------------------------------------------------------------------
+VimWitsMatch                                                    *VimWitsMatch*
+
+This is a highlight group which specifies how VimWits highlights. E.g. to have
+VimWits bold instead of underline, do: >
+
+  highlight VimWitsMatch term=bold cterm=bold gui=bold
+<
+Default: term=underline cterm=underline gui=underline
+
+
+==============================================================================
+LICENSE                                                       *VimWitsLicense*
+
+VimWits is copyright Stephen Robinson, 2017. It is provided free of charge,
+and there is no warranty for it, to the extent permitted by applicable law.
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) version 3.
+
+A copy of the GPL v2 may be obtained at:
+
+https://www.gnu.org/licenses/gpl-2.0.txt
+
+==============================================================================
+BUGS                                                             *VimWitsBugs*
+
+VimWits shares a bug with Vim's matchparen plugin. If you are highlighting a
+word, and there is another such word just off screen, if you scroll to see
+this other word, it will not be highlighted. For some discussion of this, see
+the corresponding vim bug: https://github.com/vim/vim/issues/776
+
+A currently missing feature is per-buffer / per-filetype vimwits_ignore
+variables. Right now, I am assuming that you can use one regex for all
+languages to determine what is a symbol and what is not.
+
+==============================================================================
+CONTRIBUTING                                             *VimWitsContributing*
+
+Hacking on VimWits is encouraged. All development takes place on github. If
+you make a great modification, please fork and make a pull request!
+
+ vim:tw=78:ts=8:ft=help:norl:
