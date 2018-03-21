@@ -42,7 +42,7 @@ if !exists("g:vimwits_ft_patterns")
                               \*.py,*.pl,*.cs,*.java,*.php,*.js,*.rb,*.go,*.mm"
 endif
 if !exists("g:vimwits_in_insert")
-  let g:vimwits_in_insert = 0
+  let g:vimwits_in_insert = 1
 endif
 if !exists("g:vimwits_valid_hi_groups")
   let g:vimwits_valid_hi_groups = [""]

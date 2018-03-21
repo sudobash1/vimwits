@@ -134,7 +134,7 @@ g:vimwits_in_insert                                      *g:vimwits_in_insert*
 If this is set to 1, then VimWits will still underline the current symbol,
 even if you are in insert mode.
 
-Default: 0 (VimWits disabled in insert mode)
+Default: 1 (VimWits enabled in insert mode)
 
 ------------------------------------------------------------------------------
 g:vimwits_valid_hi_groups                          *g:vimwits_valid_hi_groups*

@@ -20,6 +20,9 @@ endif
 
 " SECTION: helper functions {{{
 
+" Setup the autocmds
+" If buf_local is true, then setup the autocmds for the current
+" buffer instead of globally.
 func s:au_setup(buf_local)
   if a:buf_local
     let l:group = "vimwits_buf"
@@ -30,9 +33,10 @@ func s:au_setup(buf_local)
   endif
 
   exe "augroup " . l:group
-    exe "autocmd CursorMoved " . l:pats . " call s:do_highlight()"
-    if g:vimwits_in_insert
-      exe "autocmd CursorMovedI " . l:pats . " call s:do_highlight()"
+    exe "autocmd CursorMoved " . l:pats . " call s:do_highlight('n')"
+    if exists('##CursorMovedI')
+      exe "autocmd CursorMovedI " . l:pats .
+        \ " if g:vimwits_in_insert | call s:do_highlight('i') | endif"
     endif
     if exists('##WinEnter')
       exe "autocmd WinEnter " . l:pats . " call s:force_do_highlight()"
@@ -42,19 +46,22 @@ func s:au_setup(buf_local)
       exe "autocmd FocusLost " . l:pats . " call s:clear()"
     endif
     if exists('##TextChanged')
-      exe "autocmd TextChanged " . l:pats . " call s:do_highlight()"
-      if g:vimwits_in_insert
-        exe "autocmd TextChangedI " . l:pats . " call s:do_highlight()"
-      endif
+      exe "autocmd TextChanged " . l:pats . " call s:do_highlight('n')"
     endif
+    " The below isn't needed because changing the text in insert mode
+    " should also move the cursor.
+    "if exists('##TextChangedI')
+    "  exe "autocmd TextChangedI " . l:pats .
+    "    \ " if g:vimwits_in_insert | call s:do_highlight('i') | endif"
+    "endif
     if exists('##InsertEnter')
-      exe "autocmd InsertLeave " . l:pats . " call s:do_highlight()"
-      if !g:vimwits_in_insert
-        exe "autocmd InsertEnter " . l:pats . " call s:clear()"
-      endif
+      exe "autocmd InsertLeave " . l:pats . " call s:do_highlight('n')"
+      exe "autocmd InsertEnter " . l:pats .
+        \ " if !g:vimwits_in_insert | call s:clear() | else |" .
+        \ " call s:do_highlight('i') | endif"
     endif
     if exists('##VimResized')
-      exe "autocmd VimResized " . l:pats . " call s:do_highlight()"
+      exe "autocmd VimResized " . l:pats . " call s:do_highlight('n')"
     endif
 
     if exists('##User')
@@ -71,8 +78,20 @@ func s:clear()
   endif
 endfunc
 
-func s:do_highlight()
-  let l:cword = escape(expand('<cword>'), '/\' )
+func s:do_highlight(mode)
+
+  if a:mode == "i"
+    " We are in insert mode. Try looking behind the cursor
+    " (where we have been typing) to see if there is a word there.
+    let l:pos = getpos(".")
+    normal! h
+    let l:cword = escape(expand('<cword>'), '/\' )
+    let l:col = col('.')
+    call setpos('.', l:pos)
+  else
+    let l:cword = escape(expand('<cword>'), '/\' )
+    let l:col = col('.')
+  endif
 
   " Test if enabled and on a valid word
   if l:cword == "" || l:cword=~g:vimwits_ignore ||
@@ -82,9 +101,11 @@ func s:do_highlight()
   endif
 
   " Test if the cursor is actually on <cword>
-  if ! (matchstr(getline('.'), '\%'.col('.').'c.') =~# '\k')
-    call s:clear()
-    return
+  if !(matchstr(getline('.'), '\%'.l:col.'c.') =~# '\k')
+    if a:mode == "i" && !(matchstr(getline('.'), '\%'.col(".").'c.') =~# '\k')
+      call s:clear()
+      return
+    endif
   endif
 
   let l:syn = vimwits#syntax_group()
@@ -124,7 +145,7 @@ endfunction
 
 func s:force_do_highlight()
   call s:clear()
-  call s:do_highlight()
+  call s:do_highlight('n')
 endfunc
 
 " }}}
@@ -144,7 +165,7 @@ func vimwits#reset()
   endfor
   if g:vimwits_enable
     call s:au_setup(0)
-    call s:do_highlight()
+    call s:do_highlight('n')
   else
     call vimwits#disable()
   endif
@@ -154,7 +175,7 @@ func vimwits#enable_buf()
   " Make sure vimwits is enabled
   let g:vimwits_enable = 1
   call s:au_setup(0)
-  call s:do_highlight()
+  call s:do_highlight('n')
 
   " Use the User autocmd to test if this buffer already has autocommands
   let b:__vimwits_has_au = 0
@@ -166,7 +187,7 @@ func vimwits#enable_buf()
   endif
   let b:vimwits_enable = 1
 
-  call s:do_highlight()
+  call s:do_highlight('n')
 endfunc
 
 func vimwits#disable_buf()
@@ -181,7 +202,7 @@ func vimwits#disable_bufs()
   augroup vimwits_buf
     au!
   augroup END
-  call s:do_highlight()
+  call s:do_highlight('n')
 endfunc
 
 func vimwits#disable()
