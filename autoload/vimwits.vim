@@ -179,7 +179,9 @@ func vimwits#enable_buf()
 
   " Use the User autocmd to test if this buffer already has autocommands
   let b:__vimwits_has_au = 0
-  silent doautocmd vimwits User
+  if exists('##User')
+    silent doautocmd vimwits User
+  endif
 
   if getbufvar('%', "__vimwits_has_au", 0) == 0
     call s:au_setup(1)
